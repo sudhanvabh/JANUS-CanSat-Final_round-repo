@@ -34,25 +34,27 @@ Adafruit_BMP280 bmp;
 void setup() {
   Serial.begin(9600);
   if (!bmp.begin()) {
-    Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+    Serial.println("Could not find a valid BMP280 sensor, check wiring!"); //starting the BMP sensor and pausing the execution if the sensor doesnt start
     while (1);
   }
 
   sensorValue = bmp.readAltitude(1013.25); // Initializing EMA with the first sample point
-  ema = sensorValue;
-  previousEma = ema;
+  ema = sensorValue; 
+  previousEma = ema; //assigning the previous value in order to calculate altitude difference
 }
 
 void loop() {
   // Read the Altitude sensor
   sensorValue = bmp.readAltitude(1013.25);
   
-  ema = (smoothingFactor * sensorValue) + ((1 - smoothingFactor) * previousEma); // Updating EMA
+  // refer EMA.png for the formula for calculation of EMA
+  
+  ema = (smoothingFactor * sensorValue) + ((1 - smoothingFactor) * previousEma); 
   
   float altitudeDifference = ema - previousEma; // Calculate the altitude difference
   
   // Determine the CanSat's state
-  if (abs(altitudeDifference) > threshold) {
+  if (abs(altitudeDifference) > threshold) { // checking if the difference is large enough for discarding minor error
     if (altitudeDifference < 0) {
       Serial.println("CanSat is Descending");
     } else {
@@ -63,11 +65,11 @@ void loop() {
   }
   
   // Output the result
-  Serial.print("Current EMA Altitude: ");
+  Serial.print("Current EMA Altitude: "); // average output onto the serial
   Serial.println(ema);
 
   // Update previous EMA
   previousEma = ema;
   
-  delay(1000);  // Delay to match your sensor reading rate
+  delay(1000); 
 }
